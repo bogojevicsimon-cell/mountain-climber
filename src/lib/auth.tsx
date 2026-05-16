@@ -14,6 +14,7 @@ export interface Profile {
   last_relapse_at: string | null;
   is_pro: boolean;
   onboarded: boolean;
+  created_at: string;
 }
 
 interface AuthCtx {

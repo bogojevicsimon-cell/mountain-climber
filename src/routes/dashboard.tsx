@@ -11,13 +11,6 @@ export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
 const MILESTONES = [7, 30, 100, 365];
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
-function dayDiff(a: string, b: string) {
-  const da = new Date(a + "T00:00:00Z").getTime();
-  const db = new Date(b + "T00:00:00Z").getTime();
-  return Math.round((db - da) / 86400000);
-}
-
 function Dashboard() {
   const nav = useNavigate();
   const { user, profile, loading, refreshProfile, signOut } = useAuth();
@@ -40,28 +33,17 @@ function Dashboard() {
     return Math.max(0.08, baseSize - (baseSize - 0.08) * shrinkFactor);
   }, [profile, baseSize]);
 
-  // Both buttons lock out once either is clicked today
-  const checkedInToday = profile?.last_checkin_date === todayISO();
-
+  // No daily restriction — user can click anytime
   const handleCheckin = async () => {
     if (!user || !profile) return;
-    if (checkedInToday) return;
     setBusy(true);
-    const today = todayISO();
-    let newStreak = profile.current_streak + 1;
-    if (profile.last_checkin_date) {
-      const gap = dayDiff(profile.last_checkin_date, today);
-      if (gap > 1) newStreak = 1;
-    } else {
-      newStreak = 1;
-    }
+    const newStreak = profile.current_streak + 1;
     const newLongest = Math.max(profile.longest_streak, newStreak);
     const newTotal = profile.total_clean_days + 1;
     const { error } = await supabase.from("profiles").update({
       current_streak: newStreak,
       longest_streak: newLongest,
       total_clean_days: newTotal,
-      last_checkin_date: today,
     }).eq("id", user.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
@@ -80,13 +62,11 @@ function Dashboard() {
 
   const handleRelapse = async () => {
     if (!user || !profile) return;
-    if (checkedInToday) return;
     if (!confirm("Log a relapse? Your streak will reset to 0 and the mountain grows back.")) return;
     setBusy(true);
     const now = new Date().toISOString();
     const { error } = await supabase.from("profiles").update({
       current_streak: 0,
-      last_checkin_date: todayISO(),
       last_relapse_at: now,
     }).eq("id", user.id);
     setBusy(false);
@@ -95,7 +75,7 @@ function Dashboard() {
     setRelapsing(true);
     setTimeout(() => setRelapsing(false), 1800);
     await refreshProfile();
-    toast("The mountain is back. Tomorrow you start shrinking again.", { icon: "⛰️" });
+    toast("The mountain is back. Start shrinking it again.", { icon: "⛰️" });
   };
 
   if (loading || !profile) {
@@ -115,14 +95,13 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
-        {/* Habit name */}
         <div className="text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground sm:text-sm">Quitting</p>
           <h1 className="mt-1 text-2xl font-bold sm:text-4xl">{profile.habit_name}</h1>
         </div>
 
-        {/* ===== PROMINENT COUNTDOWN TIMER — visible immediately ===== */}
-        <CleanCountdown lastRelapseAt={profile.last_relapse_at} currentStreak={profile.current_streak} />
+        {/* Countdown timer — counts up from last relapse or signup */}
+        <CleanCountdown lastRelapseAt={profile.last_relapse_at} createdAt={profile.created_at} />
 
         {/* Mountain */}
         <div className="mt-6 -mx-4 sm:-mx-6 md:-mx-12 lg:-mx-20 rounded-none sm:rounded-3xl sm:border sm:border-border bg-card sm:shadow-dramatic overflow-hidden">
@@ -136,24 +115,13 @@ function Dashboard() {
           <Stat label="Longest streak" value={`${profile.longest_streak}`} sub="days" />
         </div>
 
-        {/* ===== CHECK-IN BUTTONS — both lock after any click today ===== */}
+        {/* Buttons — no daily limit, always clickable */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Button
-            size="lg"
-            onClick={handleCheckin}
-            disabled={busy || checkedInToday}
-            className="h-14 sm:h-16 w-full text-base font-semibold shadow-glow active:scale-95 transition-transform"
-          >
-            {checkedInToday ? "Come back tomorrow" : "I stayed clean today"}
+          <Button size="lg" onClick={handleCheckin} disabled={busy} className="h-14 sm:h-16 w-full text-base font-semibold shadow-glow active:scale-95 transition-transform">
+            I stayed clean today
           </Button>
-          <Button
-            size="lg"
-            variant="destructive"
-            onClick={handleRelapse}
-            disabled={busy || checkedInToday}
-            className="h-14 sm:h-16 w-full text-base font-semibold active:scale-95 transition-transform"
-          >
-            {checkedInToday ? "Come back tomorrow" : "I relapsed today"}
+          <Button size="lg" variant="destructive" onClick={handleRelapse} disabled={busy} className="h-14 sm:h-16 w-full text-base font-semibold active:scale-95 transition-transform">
+            I relapsed today
           </Button>
         </div>
 
@@ -175,26 +143,16 @@ function Dashboard() {
   );
 }
 
-/* ===== Live Countdown Timer — large, prominent, glowing ===== */
-function CleanCountdown({ lastRelapseAt, currentStreak }: { lastRelapseAt: string | null; currentStreak: number }) {
-  const [time, setTime] = useState(() => computeTime(lastRelapseAt, currentStreak));
+/* ===== Live Countdown Timer ===== */
+function CleanCountdown({ lastRelapseAt, createdAt }: { lastRelapseAt: string | null; createdAt: string }) {
+  const [time, setTime] = useState(() => computeTime(lastRelapseAt, createdAt));
 
   useEffect(() => {
-    const update = () => setTime(computeTime(lastRelapseAt, currentStreak));
+    const update = () => setTime(computeTime(lastRelapseAt, createdAt));
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, [lastRelapseAt, currentStreak]);
-
-  if (currentStreak === 0 && !lastRelapseAt) {
-    return (
-      <div className="mt-8 text-center">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Time clean</p>
-        <div className="mt-2 text-3xl sm:text-5xl font-bold text-muted-foreground/40 tabular-nums">00:00:00:00</div>
-        <p className="mt-2 text-sm text-muted-foreground">Check in to start your clean streak</p>
-      </div>
-    );
-  }
+  }, [lastRelapseAt, createdAt]);
 
   return (
     <div className="mt-8 text-center">
@@ -223,21 +181,13 @@ function TimerUnit({ value, label }: { value: string; label: string }) {
 
 function TimerColon() {
   return (
-    <span className="text-3xl sm:text-5xl font-bold text-primary/50 animate-pulse leading-none self-start mt-0 sm:mt-0">:</span>
+    <span className="text-3xl sm:text-5xl font-bold text-primary/50 animate-pulse leading-none self-start mt-0">:</span>
   );
 }
 
-function computeTime(lastRelapseAt: string | null, currentStreak: number) {
-  let start: Date;
-  if (lastRelapseAt) {
-    start = new Date(lastRelapseAt);
-  } else if (currentStreak > 0) {
-    start = new Date();
-    start.setDate(start.getDate() - currentStreak);
-    start.setHours(0, 0, 0, 0);
-  } else {
-    return { d: "00", h: "00", m: "00", s: "00" };
-  }
+function computeTime(lastRelapseAt: string | null, createdAt: string) {
+  // Count up from last relapse timestamp; if never relapsed, count from signup
+  const start = lastRelapseAt ? new Date(lastRelapseAt) : new Date(createdAt);
   const diff = Math.max(0, Date.now() - start.getTime());
   const totalSec = Math.floor(diff / 1000);
   const d = Math.floor(totalSec / 86400);
@@ -252,7 +202,7 @@ function computeTime(lastRelapseAt: string | null, currentStreak: number) {
   };
 }
 
-/* ===== Milestone Badge with Gold Glow & Particle Burst ===== */
+/* ===== Milestone Badge ===== */
 function MilestoneBadge({ days, reached, justEarned }: { days: number; reached: boolean; justEarned: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
