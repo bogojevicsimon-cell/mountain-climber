@@ -11,6 +11,7 @@ export interface Profile {
   total_clean_days: number;
   longest_streak: number;
   last_checkin_date: string | null;
+  last_relapse_at: string | null;
   is_pro: boolean;
   onboarded: boolean;
 }

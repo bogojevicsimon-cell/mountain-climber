@@ -40,22 +40,22 @@ function Pricing() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2 font-bold"><MountainIcon className="h-5 w-5 text-primary" /> UnHabit</Link>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <Link to="/" className="flex items-center gap-2 text-base font-bold sm:text-lg"><MountainIcon className="h-5 w-5 text-primary" /> UnHabit</Link>
           <div className="flex gap-2">
-            {user ? <Link to="/dashboard"><Button size="sm">Dashboard</Button></Link> : <Link to="/login"><Button size="sm">Log in</Button></Link>}
+            {user ? <Link to="/dashboard"><Button size="sm" className="text-xs sm:text-sm">Dashboard</Button></Link> : <Link to="/login"><Button size="sm" className="text-xs sm:text-sm">Log in</Button></Link>}
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-16">
+      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         <div className="text-center">
-          <h1 className="text-5xl font-bold text-glow sm:text-6xl">Choose your climb.</h1>
-          <p className="mt-4 text-lg text-muted-foreground">Free works. Pro works harder.</p>
+          <h1 className="text-3xl font-bold text-glow sm:text-6xl">Choose your climb.</h1>
+          <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">Free works. Pro works harder.</p>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-card p-8">
+        <div className="mt-10 grid gap-4 sm:mt-16 sm:gap-6 md:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-card p-5 sm:p-8">
             <h2 className="text-2xl font-semibold">Free</h2>
             <div className="mt-3 text-5xl font-bold">€0</div>
             <p className="mt-2 text-sm text-muted-foreground">Forever. No card needed.</p>
@@ -69,7 +69,7 @@ function Pricing() {
             </Button>
           </div>
 
-          <div className="rounded-2xl border-2 border-primary bg-card p-8 shadow-glow">
+          <div className="rounded-2xl border-2 border-primary bg-card p-5 sm:p-8 shadow-glow">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold">Pro</h2>
               <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">Most popular</span>

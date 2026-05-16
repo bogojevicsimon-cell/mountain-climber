@@ -69,14 +69,14 @@ function Settings() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Link to="/dashboard" className="flex items-center gap-2 font-bold"><MountainIcon className="h-5 w-5 text-primary" /> UnHabit</Link>
-          <Link to="/dashboard"><Button variant="ghost" size="sm">Back to dashboard</Button></Link>
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <Link to="/dashboard" className="flex items-center gap-2 text-base font-bold sm:text-lg"><MountainIcon className="h-5 w-5 text-primary" /> UnHabit</Link>
+          <Link to="/dashboard"><Button variant="ghost" size="sm" className="text-xs sm:text-sm">Back to dashboard</Button></Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-8 px-6 py-10">
-        <h1 className="text-3xl font-bold">Settings</h1>
+      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-10">
+        <h1 className="text-2xl font-bold sm:text-3xl">Settings</h1>
 
         <Section title="Habit">
           <Label htmlFor="habit">Habit name</Label>
@@ -111,7 +111,7 @@ function Settings() {
 
 function Section({ title, children, danger }: { title: string; children: React.ReactNode; danger?: boolean }) {
   return (
-    <section className={`rounded-2xl border p-6 ${danger ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"}`}>
+    <section className={`rounded-2xl border p-4 sm:p-6 ${danger ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"}`}>
       <h2 className={`mb-4 text-lg font-semibold ${danger ? "text-destructive" : ""}`}>{title}</h2>
       {children}
     </section>

@@ -61,17 +61,17 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
   return (
     <div className="min-h-screen bg-hero flex flex-col">
       <header className="border-b border-border/50 bg-background/40 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center px-4 py-3 sm:px-6 sm:py-4">
           <Link to="/" className="flex items-center gap-2 font-bold">
             <MountainIcon className="h-5 w-5 text-primary" /> UnHabit
           </Link>
         </div>
       </header>
-      <div className="flex flex-1 items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-dramatic">
-          <h1 className="text-3xl font-bold">{title}</h1>
+      <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-dramatic">
+          <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
-          <div className="mt-8">{children}</div>
+          <div className="mt-6 sm:mt-8">{children}</div>
         </div>
       </div>
     </div>

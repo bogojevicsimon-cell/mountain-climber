@@ -23,6 +23,7 @@ export type Database = {
           id: string
           is_pro: boolean
           last_checkin_date: string | null
+          last_relapse_at: string | null
           longest_streak: number
           onboarded: boolean
           severity: string | null
@@ -51,6 +52,7 @@ export type Database = {
           id?: string
           is_pro?: boolean
           last_checkin_date?: string | null
+          last_relapse_at?: string | null
           longest_streak?: number
           onboarded?: boolean
           severity?: string | null
