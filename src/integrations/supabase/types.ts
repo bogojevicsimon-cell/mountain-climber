@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          current_streak: number
+          email: string | null
+          habit_name: string | null
+          id: string
+          is_pro: boolean
+          last_checkin_date: string | null
+          longest_streak: number
+          onboarded: boolean
+          severity: string | null
+          total_clean_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          email?: string | null
+          habit_name?: string | null
+          id: string
+          is_pro?: boolean
+          last_checkin_date?: string | null
+          longest_streak?: number
+          onboarded?: boolean
+          severity?: string | null
+          total_clean_days?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          email?: string | null
+          habit_name?: string | null
+          id?: string
+          is_pro?: boolean
+          last_checkin_date?: string | null
+          longest_streak?: number
+          onboarded?: boolean
+          severity?: string | null
+          total_clean_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
