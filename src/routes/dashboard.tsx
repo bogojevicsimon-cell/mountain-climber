@@ -86,8 +86,9 @@ function Dashboard() {
     }).eq("id", user.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    setFxKey((k) => k + 1);
     setRelapsing(true);
-    setTimeout(() => setRelapsing(false), 900);
+    setTimeout(() => setRelapsing(false), 1800);
     await refreshProfile();
     toast("The mountain is back. Tomorrow you start shrinking again.", { icon: "⛰️" });
   };
