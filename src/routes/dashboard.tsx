@@ -24,6 +24,7 @@ function Dashboard() {
   const [busy, setBusy] = useState(false);
   const [relapsing, setRelapsing] = useState(false);
   const [shrinking, setShrinking] = useState(false);
+  const [fxKey, setFxKey] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login" });
