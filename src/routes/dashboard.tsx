@@ -40,11 +40,12 @@ function Dashboard() {
     return Math.max(0.08, baseSize - (baseSize - 0.08) * shrinkFactor);
   }, [profile, baseSize]);
 
-  const alreadyCheckedToday = profile?.last_checkin_date === todayISO();
+  // Both buttons lock out once either is clicked today
+  const checkedInToday = profile?.last_checkin_date === todayISO();
 
   const handleCheckin = async () => {
     if (!user || !profile) return;
-    if (alreadyCheckedToday) { toast("Already checked in today. Keep going."); return; }
+    if (checkedInToday) return;
     setBusy(true);
     const today = todayISO();
     let newStreak = profile.current_streak + 1;
@@ -79,6 +80,7 @@ function Dashboard() {
 
   const handleRelapse = async () => {
     if (!user || !profile) return;
+    if (checkedInToday) return;
     if (!confirm("Log a relapse? Your streak will reset to 0 and the mountain grows back.")) return;
     setBusy(true);
     const now = new Date().toISOString();
@@ -113,34 +115,49 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+        {/* Habit name */}
         <div className="text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground sm:text-sm">Quitting</p>
           <h1 className="mt-1 text-2xl font-bold sm:text-4xl">{profile.habit_name}</h1>
         </div>
 
-        {/* Live countdown timer */}
+        {/* ===== PROMINENT COUNTDOWN TIMER — visible immediately ===== */}
         <CleanCountdown lastRelapseAt={profile.last_relapse_at} currentStreak={profile.current_streak} />
 
-        {/* Mountain - bigger and more dramatic */}
+        {/* Mountain */}
         <div className="mt-6 -mx-4 sm:-mx-6 md:-mx-12 lg:-mx-20 rounded-none sm:rounded-3xl sm:border sm:border-border bg-card sm:shadow-dramatic overflow-hidden">
           <Mountain size={mountainSize} relapsing={relapsing} shrinking={shrinking} fxKey={fxKey} />
         </div>
 
+        {/* Stats */}
         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-4">
           <Stat label="Current streak" value={`${profile.current_streak}`} sub="days" />
           <Stat label="Total clean" value={`${profile.total_clean_days}`} sub="days" />
           <Stat label="Longest streak" value={`${profile.longest_streak}`} sub="days" />
         </div>
 
+        {/* ===== CHECK-IN BUTTONS — both lock after any click today ===== */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Button size="lg" onClick={handleCheckin} disabled={busy || alreadyCheckedToday} className="h-14 sm:h-16 w-full text-base font-semibold shadow-glow active:scale-95 transition-transform">
-            {alreadyCheckedToday ? "✓ Stayed clean today" : "I stayed clean today"}
+          <Button
+            size="lg"
+            onClick={handleCheckin}
+            disabled={busy || checkedInToday}
+            className="h-14 sm:h-16 w-full text-base font-semibold shadow-glow active:scale-95 transition-transform"
+          >
+            {checkedInToday ? "Come back tomorrow" : "I stayed clean today"}
           </Button>
-          <Button size="lg" variant="destructive" onClick={handleRelapse} disabled={busy} className="h-14 sm:h-16 w-full text-base font-semibold active:scale-95 transition-transform">
-            I relapsed today
+          <Button
+            size="lg"
+            variant="destructive"
+            onClick={handleRelapse}
+            disabled={busy || checkedInToday}
+            className="h-14 sm:h-16 w-full text-base font-semibold active:scale-95 transition-transform"
+          >
+            {checkedInToday ? "Come back tomorrow" : "I relapsed today"}
           </Button>
         </div>
 
+        {/* Milestones */}
         <div className="mt-8 sm:mt-10">
           <h2 className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold">Milestones</h2>
           <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
@@ -158,7 +175,7 @@ function Dashboard() {
   );
 }
 
-/* ===== Live Countdown Timer ===== */
+/* ===== Live Countdown Timer — large, prominent, glowing ===== */
 function CleanCountdown({ lastRelapseAt, currentStreak }: { lastRelapseAt: string | null; currentStreak: number }) {
   const [time, setTime] = useState(() => computeTime(lastRelapseAt, currentStreak));
 
@@ -171,33 +188,42 @@ function CleanCountdown({ lastRelapseAt, currentStreak }: { lastRelapseAt: strin
 
   if (currentStreak === 0 && !lastRelapseAt) {
     return (
-      <div className="mt-6 text-center">
-        <p className="text-sm text-muted-foreground">Check in to start your clean streak</p>
+      <div className="mt-8 text-center">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Time clean</p>
+        <div className="mt-2 text-3xl sm:text-5xl font-bold text-muted-foreground/40 tabular-nums">00:00:00:00</div>
+        <p className="mt-2 text-sm text-muted-foreground">Check in to start your clean streak</p>
       </div>
     );
   }
 
   return (
-    <div className="mt-6 flex justify-center">
-      <div className="inline-flex items-center gap-1 sm:gap-2 rounded-2xl border border-border bg-card px-4 py-3 sm:px-6 sm:py-4 shadow-glow">
-        <TimeUnit value={time.d} label="DAYS" />
-        <span className="text-xl sm:text-3xl font-bold text-primary/60 animate-pulse">:</span>
-        <TimeUnit value={time.h} label="HRS" />
-        <span className="text-xl sm:text-3xl font-bold text-primary/60 animate-pulse">:</span>
-        <TimeUnit value={time.m} label="MIN" />
-        <span className="text-xl sm:text-3xl font-bold text-primary/60 animate-pulse">:</span>
-        <TimeUnit value={time.s} label="SEC" />
+    <div className="mt-8 text-center">
+      <p className="text-xs uppercase tracking-widest text-muted-foreground">Time clean since last relapse</p>
+      <div className="mt-3 flex items-center justify-center gap-1 sm:gap-2">
+        <TimerUnit value={time.d} label="DAYS" />
+        <TimerColon />
+        <TimerUnit value={time.h} label="HRS" />
+        <TimerColon />
+        <TimerUnit value={time.m} label="MIN" />
+        <TimerColon />
+        <TimerUnit value={time.s} label="SEC" />
       </div>
     </div>
   );
 }
 
-function TimeUnit({ value, label }: { value: string; label: string }) {
+function TimerUnit({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col items-center min-w-[2.5rem] sm:min-w-[3.5rem]">
-      <span className="text-2xl sm:text-4xl font-bold text-glow tabular-nums tracking-tight">{value}</span>
-      <span className="text-[0.6rem] sm:text-xs text-muted-foreground tracking-widest">{label}</span>
+    <div className="flex flex-col items-center min-w-[3rem] sm:min-w-[5rem]">
+      <span className="text-4xl sm:text-6xl font-bold text-glow tabular-nums tracking-tight leading-none">{value}</span>
+      <span className="mt-1 text-[0.55rem] sm:text-xs text-muted-foreground tracking-widest uppercase">{label}</span>
     </div>
+  );
+}
+
+function TimerColon() {
+  return (
+    <span className="text-3xl sm:text-5xl font-bold text-primary/50 animate-pulse leading-none self-start mt-0 sm:mt-0">:</span>
   );
 }
 
