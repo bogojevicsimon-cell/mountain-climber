@@ -24,6 +24,7 @@ function Dashboard() {
   const [busy, setBusy] = useState(false);
   const [relapsing, setRelapsing] = useState(false);
   const [shrinking, setShrinking] = useState(false);
+  const [fxKey, setFxKey] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login" });
@@ -64,8 +65,9 @@ function Dashboard() {
     }).eq("id", user.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    setFxKey((k) => k + 1);
     setShrinking(true);
-    setTimeout(() => setShrinking(false), 1500);
+    setTimeout(() => setShrinking(false), 2200);
     await refreshProfile();
     if (MILESTONES.includes(newStreak)) {
       toast.success(`🏆 ${newStreak}-day milestone unlocked!`);
@@ -84,8 +86,9 @@ function Dashboard() {
     }).eq("id", user.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    setFxKey((k) => k + 1);
     setRelapsing(true);
-    setTimeout(() => setRelapsing(false), 900);
+    setTimeout(() => setRelapsing(false), 1800);
     await refreshProfile();
     toast("The mountain is back. Tomorrow you start shrinking again.", { icon: "⛰️" });
   };
@@ -113,7 +116,7 @@ function Dashboard() {
         </div>
 
         <div className="mt-8 rounded-3xl border border-border bg-card shadow-dramatic overflow-hidden">
-          <Mountain size={mountainSize} relapsing={relapsing} shrinking={shrinking} />
+          <Mountain size={mountainSize} relapsing={relapsing} shrinking={shrinking} fxKey={fxKey} />
         </div>
 
         <div className="mt-8 grid grid-cols-3 gap-4">
