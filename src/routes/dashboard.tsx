@@ -116,7 +116,7 @@ function Dashboard() {
         </div>
 
         <div className="mt-8 rounded-3xl border border-border bg-card shadow-dramatic overflow-hidden">
-          <Mountain size={mountainSize} relapsing={relapsing} shrinking={shrinking} />
+          <Mountain size={mountainSize} relapsing={relapsing} shrinking={shrinking} fxKey={fxKey} />
         </div>
 
         <div className="mt-8 grid grid-cols-3 gap-4">
