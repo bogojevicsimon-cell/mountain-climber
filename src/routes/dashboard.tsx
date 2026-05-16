@@ -65,8 +65,9 @@ function Dashboard() {
     }).eq("id", user.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    setFxKey((k) => k + 1);
     setShrinking(true);
-    setTimeout(() => setShrinking(false), 1500);
+    setTimeout(() => setShrinking(false), 2200);
     await refreshProfile();
     if (MILESTONES.includes(newStreak)) {
       toast.success(`🏆 ${newStreak}-day milestone unlocked!`);
